@@ -24,7 +24,7 @@ function Home() {
   const { user } = useContext(AuthContext);
 
   const [tasks, setTasks] = useState({ todo: [], inProgress: [], done: [] });
-
+  console.log(tasks);
   // Modal state for Edit
   const [showEditModal, setShowEditModal] = useState(false);
   const [editedTask, setEditedTask] = useState({
@@ -147,14 +147,14 @@ function Home() {
       {user && (
         <>
           <DragDropContext onDragEnd={onDragEnd}>
-            <div className="flex space-x-4 p-10 mx-auto w-full min-h-screen">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 justify-center  p-10 mx-auto w-full min-h-screen">
               {Object.entries(tasks).map(([columnId, columnTasks]) => (
                 <Droppable key={columnId} droppableId={columnId}>
                   {(provided) => (
                     <div
                       ref={provided.innerRef}
                       {...provided.droppableProps}
-                      className="bg-gray-100 p-4 w-80 rounded-lg shadow-md"
+                      className="bg-gray-100 p-4 w-80 min-h-[200px] rounded-lg shadow-md"
                     >
                       <h2 className="text-lg font-bold mb-2 capitalize">
                         {columnId}

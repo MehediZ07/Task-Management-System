@@ -70,25 +70,25 @@ const Login = () => {
         <form onSubmit={handleSubmit} className="card-body">
           <div className="form-control">
             <label className="label">
-              <span className="label-text text-black">Email</span>
+              <span className="label-text text-white">Email</span>
             </label>
             <input
               name="email"
               type="email"
               placeholder="email"
-              className="input input-bordered"
+              className="input input-bordered text-white"
               required
             />
           </div>
           <div className="form-control relative">
             <label className="label">
-              <span className="label-text text-black">Password</span>
+              <span className="label-text text-white">Password</span>
             </label>
             <input
               name="password"
               type={isPasswordVisible ? "text" : "password"}
               placeholder="password"
-              className="input input-bordered"
+              className="input input-bordered text-white"
               required
             />
             <button
