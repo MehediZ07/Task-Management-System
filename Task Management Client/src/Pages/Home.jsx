@@ -1,10 +1,11 @@
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import axios from "axios";
+import { useState, useEffect, useContext } from "react";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
-import { useContext, useState, useEffect } from "react";
 import Hero from "../Components/Hero";
 import { AuthContext } from "../Providers/AuthProvider";
-import axios from "axios";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { toast } from "react-toastify";
 
 function Home() {
   const queryClient = useQueryClient();
@@ -24,6 +25,18 @@ function Home() {
 
   const [tasks, setTasks] = useState({ todo: [], inProgress: [], done: [] });
 
+  // Modal state for Edit
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editedTask, setEditedTask] = useState({
+    _id: "",
+    name: "",
+    description: "",
+    technology: "",
+    givenBy: "",
+    deadline: "",
+    status: "todo",
+  });
+
   useEffect(() => {
     if (fetchedTasks) {
       setTasks({
@@ -34,35 +47,55 @@ function Home() {
     }
   }, [fetchedTasks]);
 
-  // const [newTask, setNewTask] = useState({
-  //   name: "",
-  //   description: "",
-  //   technology: "",
-  //   givenBy: "",
-  //   deadline: "",
-  //   status: "todo",
-  // });
+  // Handle editing
+  const handleEdit = (task) => {
+    console.log("Editing task", task); // Debugging line
+    setEditedTask({
+      _id: task._id,
+      name: task.name,
+      description: task.description,
+      technology: task.technology,
+      givenBy: task.givenBy,
+      deadline: task.deadline,
+      status: task.status,
+    });
+    setShowEditModal(true);
+  };
 
-  // const addTask = async (e) => {
-  //   e.preventDefault();
-  //   if (Object.values(newTask).some((val) => val.trim() === "")) return;
+  // Handle submitting the edit form
+  const handleEditSubmit = async (e) => {
+    e.preventDefault();
 
-  //   try {
-  //     await axios.post("http://localhost:5000/task", newTask);
-  //     queryClient.invalidateQueries("task");
-  //     setNewTask({
-  //       name: "",
-  //       description: "",
-  //       technology: "",
-  //       givenBy: "",
-  //       deadline: "",
-  //       status: "todo",
-  //     });
-  //   } catch (error) {
-  //     console.error("Error adding task:", error);
-  //   }
-  // };
+    try {
+      await axios.put(
+        `http://localhost:5000/taskedit/${editedTask._id}`,
+        editedTask
+      );
+      queryClient.invalidateQueries("task");
+      setShowEditModal(false); // Close the modal after edit
 
+      toast.success("Task updated successfully!", {
+        position: "top-center",
+        autoClose: 3000,
+      });
+    } catch (error) {
+      console.error("Error updating task:", error);
+      toast.error("Failed to update task.");
+    }
+  };
+
+  const handleDelete = async (_id) => {
+    try {
+      await axios.delete(`http://localhost:5000/task/${_id}`);
+      refetch(); // Refresh tasks list
+      toast.success("Delete Successfully.");
+    } catch (err) {
+      console.log(err);
+      toast.error(err.response?.data || "Error deleting task");
+    }
+  };
+
+  // Handle the drag and drop logic
   const onDragEnd = async (result) => {
     if (!result.destination) return;
 
@@ -71,17 +104,17 @@ function Home() {
     const destColumn = destination.droppableId;
 
     if (sourceColumn === destColumn) {
-      // ✅ Fix Reorder in the Same Group
+      // Reorder within the same column
       const reorderedTasks = Array.from(tasks[sourceColumn]);
       const [movedItem] = reorderedTasks.splice(source.index, 1);
       reorderedTasks.splice(destination.index, 0, movedItem);
 
       setTasks((prev) => ({
         ...prev,
-        [sourceColumn]: reorderedTasks, // No copy issue
+        [sourceColumn]: reorderedTasks,
       }));
     } else {
-      // ✅ Move Task Between Groups + Update MongoDB
+      // Move task between columns and update status in backend
       const sourceTasks = Array.from(tasks[sourceColumn]);
       const destinationTasks = Array.from(tasks[destColumn]);
 
@@ -106,18 +139,6 @@ function Home() {
     }
   };
 
-  const handleDelete = async (_id) => {
-    try {
-      // Ensure the full URL is used for the delete request
-      await axios.delete(`http://localhost:5000/task/${_id}`);
-      refetch(); // Refresh the tasks list
-      toast.success("Delete Successfully.");
-    } catch (err) {
-      console.log(err);
-      toast.error(err.response?.data || "Error deleting task");
-    }
-  };
-
   if (isLoading) return <h2>Loading...</h2>;
 
   return (
@@ -125,35 +146,6 @@ function Home() {
       <Hero />
       {user && (
         <>
-          {/* <div className="max-w-lg mx-auto mt-6 bg-violet-300 p-6 rounded-lg shadow-md mb-8">
-            <h2 className="text-xl font-bold mb-4 text-center text-white">
-              Add a New Task
-            </h2>
-            <form onSubmit={addTask} className="space-y-4">
-              {Object.keys(newTask).map(
-                (key) =>
-                  key !== "status" && (
-                    <input
-                      key={key}
-                      type={key === "deadline" ? "date" : "text"}
-                      placeholder={key.charAt(0).toUpperCase() + key.slice(1)}
-                      value={newTask[key]}
-                      onChange={(e) =>
-                        setNewTask({ ...newTask, [key]: e.target.value })
-                      }
-                      className="w-full p-2 rounded bg-gray-700 border border-gray-600 text-white"
-                      required
-                    />
-                  )
-              )}
-              <button
-                type="submit"
-                className="bg-blue-500 w-full py-2 rounded hover:bg-blue-600"
-              >
-                Add Task
-              </button>
-            </form>
-          </div> */}
           <DragDropContext onDragEnd={onDragEnd}>
             <div className="flex space-x-4 p-10 mx-auto w-full min-h-screen">
               {Object.entries(tasks).map(([columnId, columnTasks]) => (
@@ -196,7 +188,12 @@ function Home() {
                                 Deadline: {task.deadline}
                               </p>
                               <div className="flex gap-2">
-                                <button className="btn">Edit</button>
+                                <button
+                                  onClick={() => handleEdit(task)}
+                                  className="btn"
+                                >
+                                  Edit
+                                </button>
                                 <button
                                   onClick={() => handleDelete(task._id)}
                                   className="btn"
@@ -215,8 +212,60 @@ function Home() {
               ))}
             </div>
           </DragDropContext>
+
+          {/* Modal for Edit */}
+          {showEditModal && (
+            <div className="fixed inset-0 bg-gray-500 bg-opacity-50 flex justify-center items-center z-50">
+              <div className="bg-white p-6 rounded-lg shadow-md w-1/3">
+                <h2 className="text-xl font-bold mb-4 text-center">
+                  Edit Task
+                </h2>
+                <form onSubmit={handleEditSubmit} className="space-y-4">
+                  {Object.keys(editedTask).map(
+                    (key) =>
+                      key !== "_id" &&
+                      key !== "status" && (
+                        <input
+                          key={key}
+                          type={key === "deadline" ? "date" : "text"}
+                          placeholder={
+                            key.charAt(0).toUpperCase() + key.slice(1)
+                          }
+                          value={editedTask[key]}
+                          onChange={(e) =>
+                            setEditedTask({
+                              ...editedTask,
+                              [key]: e.target.value,
+                            })
+                          }
+                          className="w-full p-2 rounded bg-gray-700 border border-gray-600 text-white"
+                          required
+                        />
+                      )
+                  )}
+                  <div className="flex gap-2">
+                    <button
+                      type="submit"
+                      className="bg-blue-500 w-full py-2 rounded hover:bg-blue-600"
+                    >
+                      Update Task
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setShowEditModal(false)}
+                      className="bg-red-500 w-full py-2 rounded hover:bg-red-600"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
         </>
       )}
+
+      <ToastContainer />
     </>
   );
 }

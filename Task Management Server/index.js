@@ -77,6 +77,44 @@ async function run() {
             }
         });
 
+// Update task details (name, description, technology, etc.)
+app.put('/taskedit/:id', async (req, res) => {
+    try {
+        const id = req.params.id;
+        const { name, description, technology, givenBy, deadline, status } = req.body;
+
+        // Create an object with the updated fields
+        const updatedTaskData = {
+            name,
+            description,
+            technology,
+            givenBy,
+            deadline,
+            status
+        };
+
+        // Update the task in the database
+        const result = await taskCollection.updateOne(
+            { _id: new ObjectId(id) },
+            { $set: updatedTaskData }
+        );
+
+        if (result.modifiedCount === 0) {
+            return res.status(404).json({ error: "Task not found or no changes made" });
+        }
+
+        // Emit an update event to notify the client (optional)
+        io.emit("updateTasks");
+
+        // Respond with a success message
+        res.json({ message: "Task updated successfully" });
+    } catch (error) {
+        console.error("Error updating task:", error);
+        res.status(500).json({ error: "Error updating task" });
+    }
+});
+
+
         // Update task status
         app.put('/task/:id', async (req, res) => {
             try {
