@@ -5,10 +5,11 @@ import { Outlet } from "react-router-dom";
 
 export default function HomeLayout() {
   return (
-    <div className="bg-violet-100 ">
+    <div className="bg-violet-100 min-h-screen flex flex-col justify-between">
       <Navbar />
 
       <Outlet />
+
       <Footer />
     </div>
   );

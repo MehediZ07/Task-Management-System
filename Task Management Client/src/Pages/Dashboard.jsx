@@ -10,26 +10,27 @@ import { FaEdit } from "react-icons/fa";
 
 import { MdDeleteForever } from "react-icons/md";
 
-function Home() {
+function Dashboard() {
   const { user } = useContext(AuthContext);
   const queryClient = useQueryClient();
-
   const {
-    data: fetchedTasks,
+    data = [],
     isLoading,
     refetch,
   } = useQuery({
-    queryKey: ["task", user?.email],
+    queryKey: ["task"],
     queryFn: async () => {
       const { data } = await axios.get(
-        `https://task-management-server-brown-three.vercel.app/task?email=${user?.email}`
+        "https://task-management-server-brown-three.vercel.app/task"
       );
       return data;
     },
   });
 
+  const fetchedTasks = data.filter((task) => task.user === user?.email);
+
   const [tasks, setTasks] = useState({ todo: [], inProgress: [], done: [] });
-  // console.log(tasks);
+  console.log(tasks);
   // Modal state for Edit
   const [showEditModal, setShowEditModal] = useState(false);
   const [editedTask, setEditedTask] = useState({
@@ -50,11 +51,11 @@ function Home() {
         done: fetchedTasks.filter((task) => task.status === "done"),
       });
     }
-  }, [fetchedTasks]);
+  }, [fetchedTasks, data]);
 
   // Handle editing
   const handleEdit = (task) => {
-    // Debugging line
+    console.log("Editing task", task); // Debugging line
     setEditedTask({
       _id: task._id,
       name: task.name,
@@ -84,25 +85,21 @@ function Home() {
         autoClose: 3000,
       });
     } catch (error) {
-      toast.success("Task updated successfully!", {
-        position: "top-center",
-        autoClose: 3000,
-      });
-      queryClient.invalidateQueries("task");
-      setShowEditModal(false);
+      console.error("Error updating task:", error);
+      toast.error("Failed to update task.");
     }
   };
 
   const handleDelete = async (_id) => {
     try {
       await axios.delete(
-        `https://task-management-server-brown-three.vercel.app/task/${_id}`
+        `https://task-management-server-brown-three.vercel.app/${_id}`
       );
       refetch(); // Refresh tasks list
       toast.success("Delete Successfully.");
     } catch (err) {
-      refetch(); // Refresh tasks list
-      toast.success("Delete Successfully.");
+      console.log(err);
+      toast.error(err.response?.data || "Error deleting task");
     }
   };
 
@@ -141,7 +138,7 @@ function Home() {
 
       try {
         await axios.put(
-          `https://task-management-server-brown-three.vercel.app/task/${movedItem._id}`,
+          `https://task-management-server-brown-three.vercel.app/${movedItem._id}`,
           {
             status: destColumn,
           }
@@ -152,6 +149,64 @@ function Home() {
       }
     }
   };
+
+  // const onDragEnd = async (result) => {
+  //   if (!result.destination) return; // If dropped outside a valid area, do nothing
+
+  //   const { source, destination } = result;
+  //   const sourceColumn = source.droppableId;
+  //   const destColumn = destination.droppableId;
+
+  //   // Clone current tasks
+  //   const updatedTasks = { ...tasks };
+
+  //   if (sourceColumn === destColumn) {
+  //     // Reorder within the same column
+  //     const reorderedTasks = Array.from(tasks[sourceColumn]);
+  //     const [movedItem] = reorderedTasks.splice(source.index, 1);
+  //     reorderedTasks.splice(destination.index, 0, movedItem);
+
+  //     // Update the state
+  //     updatedTasks[sourceColumn] = reorderedTasks;
+  //   } else {
+  //     // Move task between columns
+  //     const sourceTasks = Array.from(tasks[sourceColumn]);
+  //     const destinationTasks = Array.from(tasks[destColumn]);
+
+  //     const [movedItem] = sourceTasks.splice(source.index, 1);
+  //     movedItem.status = destColumn; // Change the status of the moved task
+  //     destinationTasks.splice(destination.index, 0, movedItem);
+
+  //     updatedTasks[sourceColumn] = sourceTasks;
+  //     updatedTasks[destColumn] = destinationTasks;
+  //   }
+
+  //   // Update frontend state
+  //   setTasks(updatedTasks);
+
+  //   // Prepare data to send to backend
+  //   const tasksToUpdate = [
+  //     ...updatedTasks[sourceColumn].map((task, index) => ({
+  //       _id: task._id,
+  //       status: sourceColumn,
+  //       position: index,
+  //     })),
+  //     ...updatedTasks[destColumn].map((task, index) => ({
+  //       _id: task._id,
+  //       status: destColumn,
+  //       position: index,
+  //     })),
+  //   ];
+
+  //   try {
+  //     await axios.put("https://task-management-server-brown-three.vercel.app/updateTaskOrder", {
+  //       tasksToUpdate,
+  //     });
+  //     queryClient.invalidateQueries("task");
+  //   } catch (error) {
+  //     console.error("Error updating task order:", error);
+  //   }
+  // };
 
   if (isLoading) return <h2>Loading...</h2>;
 
@@ -241,7 +296,7 @@ function Home() {
           {/* Modal for Edit */}
           {showEditModal && (
             <div className="fixed inset-0 bg-gray-500 bg-opacity-50 flex justify-center items-center z-50">
-              <div className="bg-white p-6 rounded-lg shadow-md w-[90%] lg:w-1/3">
+              <div className="bg-white p-6 rounded-lg shadow-md w-1/3">
                 <h2 className="text-xl font-bold mb-4 text-center">
                   Edit Task
                 </h2>
@@ -295,4 +350,4 @@ function Home() {
   );
 }
 
-export default Home;
+export default Dashboard;

@@ -2,7 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config();
-const { Server } = require("socket.io");
+// const { Server } = require("socket.io");
 const http = require("http");
 
 const port = process.env.PORT || 5000;
@@ -25,32 +25,83 @@ const client = new MongoClient(uri, {
 });
 
 // WebSocket Server
-const io = new Server(server, {
-    cors: { origin: "*" }
-});
+// const io = new Server(server, {
+//     cors: { origin: "*" }
+// });
 
-io.on("connection", (socket) => {
-    console.log("Client connected");
-    socket.on("disconnect", () => console.log("Client disconnected"));
-});
+// io.on("connection", (socket) => {
+//     console.log("Client connected");
+//     socket.on("disconnect", () => console.log("Client disconnected"));
+// });
 
 async function run() {
     try {
-        await client.connect();
-        console.log("Connected to MongoDB");
+        // await client.connect();
+        // console.log("Connected to MongoDB");
 
         const database = client.db('taskManagement');
         const taskCollection = database.collection('task');
 
         // Fetch all tasks
+        // app.get('/task', async (req, res) => {
+        //     try {
+        //         const result = await taskCollection.find().toArray();
+        //         res.send(result);
+        //     } catch (error) {
+        //         res.status(500).json({ error: "Failed to fetch tasks" });
+        //     }
+        // });
+
+
         app.get('/task', async (req, res) => {
+            const { email } = req.query;
+            
             try {
-                const result = await taskCollection.find().toArray();
-                res.send(result);
+                const query = email ? { user: email } : {};
+                const tasks = await taskCollection.find(query).toArray();
+        
+                // Add the creation time to each task
+                tasks.forEach(task => {
+                    task.createdAt = new ObjectId(task._id).getTimestamp();
+                });
+        
+                res.send(tasks);
             } catch (error) {
                 res.status(500).json({ error: "Failed to fetch tasks" });
             }
         });
+        
+
+
+        // app.get("/task", async (req, res) => {
+        //     try {
+        //       const tasks = await taskCollection.find().sort({ status: 1, position: 1 }); 
+        //       res.json(tasks);
+        //     } catch (error) {
+        //       res.status(500).json({ error: "Failed to fetch tasks" });
+        //     }
+        //   });
+          
+
+        // app.put("/updateTaskOrder", async (req, res) => {
+        //     try {
+        //       const { tasksToUpdate } = req.body;
+          
+        //       // Bulk update tasks
+        //       const bulkOps = tasksToUpdate.map((task) => ({
+        //         updateOne: {
+        //           filter: { _id: task._id },
+        //           update: { $set: { position: task.position, status: task.status } },
+        //         },
+        //       }));
+          
+        //       await taskCollection.bulkWrite(bulkOps);
+        //       res.status(200).json({ message: "Task order updated successfully" });
+        //     } catch (error) {
+        //       res.status(500).json({ error: "Failed to update task order" });
+        //     }
+        //   });
+          
 
         // Fetch single task by ID
         app.get('/task/:id', async (req, res) => {
@@ -109,7 +160,7 @@ app.put('/taskedit/:id', async (req, res) => {
         // Respond with a success message
         res.json({ message: "Task updated successfully" });
     } catch (error) {
-        console.error("Error updating task:", error);
+        // console.error("Error updating task:", error);
         res.status(500).json({ error: "Error updating task" });
     }
 });
@@ -149,7 +200,7 @@ app.put('/taskedit/:id', async (req, res) => {
               await Task.bulkWrite(bulkOps);
               res.status(200).json({ message: "Order updated successfully" });
             } catch (error) {
-              console.error("Error updating order:", error);
+            //   console.error("Error updating order:", error);
               res.status(500).json({ error: "Failed to update task order" });
             }
           });
@@ -175,7 +226,7 @@ app.put('/taskedit/:id', async (req, res) => {
         });
 
     } catch (error) {
-        console.error("MongoDB Connection Error:", error);
+        // console.error("MongoDB Connection Error:", error);
     }
 }
 
@@ -185,7 +236,7 @@ app.get('/', (req, res) => {
     res.send('Task Manager Backend is Running');
 });
 
-server.listen(port, () => console.log(`Server running on port ${port}`));
+server.listen(port);
 
 
 // const onDragEnd = async (result) => {

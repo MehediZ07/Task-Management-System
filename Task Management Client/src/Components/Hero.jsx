@@ -1,3 +1,5 @@
+import { Link } from "react-router-dom";
+
 export default function Hero() {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-b from-violet-100 to-violet-300 p-6">
@@ -8,13 +10,16 @@ export default function Hero() {
         STAY AHEAD ALWAYS
       </h2>
       <p className="text-center text-gray-700 mt-4 max-w-xl">
-        Boost your productivity with TaskHive, the smart task manager that helps
-        you prioritize, track, and complete your tasks efficiently. Stay
+        Boost your productivity with Task Manager, the smart task manager that
+        helps you prioritize, track, and complete your tasks efficiently. Stay
         organized, stay focused, and achieve your goals effortlessly.
       </p>
-      <button className="mt-6 px-6 py-3 bg-violet-600 text-white font-medium text-lg rounded-full shadow-md hover:bg-violet-500 transition-all">
+      <Link
+        to="/addtask"
+        className="mt-6 px-6 py-3 bg-violet-600 text-white font-medium text-lg rounded-full shadow-md hover:bg-violet-500 transition-all"
+      >
         Get Started
-      </button>
+      </Link>
     </div>
   );
 }

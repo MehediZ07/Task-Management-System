@@ -11,6 +11,8 @@ import Login from "./Pages/Login.jsx";
 import Register from "./Pages/Registration.jsx";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import AddTask from "./Components/AddTask.jsx";
+import PrivateRoute from "./Providers/PrivateRoute.jsx";
+import Hero from "./Components/Hero.jsx";
 
 const queryClient = new QueryClient();
 const router = createBrowserRouter([
@@ -21,11 +23,23 @@ const router = createBrowserRouter([
     children: [
       {
         path: "/",
-        element: <Home />,
+        element: <Hero />,
       },
       {
         path: "/addtask",
-        element: <AddTask />,
+        element: (
+          <PrivateRoute>
+            <AddTask />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "/dashboard",
+        element: (
+          <PrivateRoute>
+            <Home />
+          </PrivateRoute>
+        ),
       },
       {
         path: "/login",

@@ -5,7 +5,7 @@ import { GoogleAuthProvider } from "firebase/auth";
 import { toast, ToastContainer } from "react-toastify";
 import { FaRegEye, FaRegEyeSlash } from "react-icons/fa6";
 import { AuthContext } from "../Providers/AuthProvider";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 // import { AuthContext } from "../../Providers/AuthProvider";
 // import { Helmet } from "react-helmet";
 // import { AuthContext } from "../../Providers/AuthProvider";
@@ -14,7 +14,7 @@ const Login = () => {
     useContext(AuthContext);
   const [error, setError] = useState({});
   //   const location = useLocation();
-  //   const navigate = useNavigate();
+  const navigate = useNavigate();
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const googleProvider = new GoogleAuthProvider();
 
@@ -32,6 +32,7 @@ const Login = () => {
           autoClose: 2000,
         });
         // navigate(location?.state ? location.state : "/");
+        navigate("/dashboard");
       })
       // eslint-disable-next-line no-unused-vars
       .catch((err) => {
@@ -47,7 +48,7 @@ const Login = () => {
     handleGoogleLogin(googleProvider)
       .then((result) => {
         setUser(result.user);
-        // navigate(location?.state ? location.state : "/");
+        navigate("/dashboard");
       })
       .catch((err) => {
         setError(...error, err.message);

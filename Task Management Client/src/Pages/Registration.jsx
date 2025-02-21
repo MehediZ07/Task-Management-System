@@ -50,7 +50,7 @@ const Register = () => {
               position: "top-center",
               autoClose: 2000,
             });
-            navigate("/profile");
+            navigate("/dashboard");
           })
           .catch((err) => {
             toast.error("Enter valid email and password!", {
@@ -86,7 +86,7 @@ const Register = () => {
               name="name"
               type="text"
               placeholder="name"
-              className="input input-bordered"
+              className="input input-bordered text-white"
               required
             />
           </div>
@@ -102,7 +102,7 @@ const Register = () => {
               type="text"
               name="photo"
               placeholder="photo-url"
-              className="input input-bordered"
+              className="input input-bordered text-white"
               required
             />
           </div>
@@ -115,7 +115,7 @@ const Register = () => {
               name="email"
               type="email"
               placeholder="email"
-              className="input input-bordered"
+              className="input input-bordered text-white"
               required
             />
           </div>
@@ -128,7 +128,7 @@ const Register = () => {
               name="password"
               type={isPasswordVisible ? "text" : "password"}
               placeholder="password"
-              className="input input-bordered"
+              className="input input-bordered text-white"
               required
             />
             <button

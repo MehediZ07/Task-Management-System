@@ -3,7 +3,7 @@ import { Link, NavLink } from "react-router-dom";
 import { AuthContext } from "../Providers/AuthProvider";
 
 export default function Navbar() {
-  const { user } = useContext(AuthContext);
+  const { user, logOut } = useContext(AuthContext);
   return (
     <div className="navbar bg-violet-100 text-black">
       <div className="navbar-start">
@@ -26,14 +26,63 @@ export default function Navbar() {
           </div>
           <ul
             tabIndex={0}
-            className="menu menu-sm dropdown-content bg-violet-100 rounded-box z-[1] mt-3 w-52 p-2 shadow"
+            className="menu menu-sm dropdown-content bg-violet-100 rounded-box z-[1] mt-3 w-52 p-2 shadow space-y-4"
           >
-            <li>
-              <a>Item 1</a>
-            </li>
-            <li>
-              <a>Item 3</a>
-            </li>
+            {!user ? (
+              <>
+                <li>
+                  <NavLink
+                    to="/"
+                    className={({ isActive }) =>
+                      isActive
+                        ? "bg-violet-200 px-4 py-2 rounded-lg border-b-4 solid border-violet-500"
+                        : "bg-violet-200 px-4 py-2 rounded-lg"
+                    }
+                  >
+                    Home
+                  </NavLink>
+                </li>
+              </>
+            ) : (
+              <>
+                <li>
+                  <NavLink
+                    to="/"
+                    className={({ isActive }) =>
+                      isActive
+                        ? "bg-violet-200 px-4 py-2 rounded-lg border-b-4 solid border-violet-500"
+                        : "bg-violet-200 px-4 py-2 rounded-lg"
+                    }
+                  >
+                    Home
+                  </NavLink>
+                </li>
+                <li>
+                  <NavLink
+                    to="/addtask"
+                    className={({ isActive }) =>
+                      isActive
+                        ? "bg-violet-200 px-4 py-2 rounded-lg border-b-4 solid border-violet-500"
+                        : "bg-violet-200 px-4 py-2 rounded-lg"
+                    }
+                  >
+                    Add Task
+                  </NavLink>
+                </li>
+                <li>
+                  <NavLink
+                    to="/dashboard"
+                    className={({ isActive }) =>
+                      isActive
+                        ? "bg-violet-200 px-4 py-2 rounded-lg border-b-4 solid border-violet-500"
+                        : "bg-violet-200 px-4 py-2 rounded-lg"
+                    }
+                  >
+                    Dashboard
+                  </NavLink>
+                </li>
+              </>
+            )}
           </ul>
         </div>
         <Link to="/" className="btn btn-ghost text-lg text-violet-600 ">
@@ -42,60 +91,104 @@ export default function Navbar() {
       </div>
       <div className="navbar-center hidden lg:flex">
         <ul className="flex gap-2 font-semibold">
-          <li>
-            <NavLink
-              to="/"
-              className={({ isActive }) =>
-                isActive
-                  ? "bg-violet-200 px-4 py-2 rounded-lg border-b-4 solid border-violet-500"
-                  : "bg-violet-100 px-4 py-2 rounded-lg"
-              }
-            >
-              Home
-            </NavLink>
-          </li>
-          <li>
-            <NavLink
-              to="/addtask"
-              className={({ isActive }) =>
-                isActive
-                  ? "bg-violet-200 px-4 py-2 rounded-lg border-b-4 solid border-violet-500"
-                  : "bg-violet-100 px-4 py-2 rounded-lg"
-              }
-            >
-              Add Task
-            </NavLink>
-          </li>
-          <li>
-            <NavLink
-              to="/login"
-              className={({ isActive }) =>
-                isActive
-                  ? "bg-violet-200 px-4 py-2 rounded-lg border-b-4 solid border-violet-500"
-                  : "bg-violet-100 px-4 py-2 rounded-lg"
-              }
-            >
-              Login
-            </NavLink>
-          </li>
-          <li>
-            <NavLink
-              to="/register"
-              className={({ isActive }) =>
-                isActive
-                  ? "bg-violet-200 px-4 py-2 rounded-lg border-b-4 solid border-violet-500"
-                  : "bg-violet-100 px-4 py-2 rounded-lg"
-              }
-            >
-              Signup
-            </NavLink>
-          </li>
+          {!user ? (
+            <>
+              <li>
+                <NavLink
+                  to="/"
+                  className={({ isActive }) =>
+                    isActive
+                      ? "bg-violet-200 px-4 py-2 rounded-lg border-b-4 solid border-violet-500"
+                      : "bg-violet-200 px-4 py-2 rounded-lg"
+                  }
+                >
+                  Home
+                </NavLink>
+              </li>
+            </>
+          ) : (
+            <>
+              <li>
+                <NavLink
+                  to="/"
+                  className={({ isActive }) =>
+                    isActive
+                      ? "bg-violet-200 px-4 py-2 rounded-lg border-b-4 solid border-violet-500"
+                      : "bg-violet-200 px-4 py-2 rounded-lg"
+                  }
+                >
+                  Home
+                </NavLink>
+              </li>
+              <li>
+                <NavLink
+                  to="/addtask"
+                  className={({ isActive }) =>
+                    isActive
+                      ? "bg-violet-200 px-4 py-2 rounded-lg border-b-4 solid border-violet-500"
+                      : "bg-violet-200 px-4 py-2 rounded-lg"
+                  }
+                >
+                  Add Task
+                </NavLink>
+              </li>
+              <li>
+                <NavLink
+                  to="/dashboard"
+                  className={({ isActive }) =>
+                    isActive
+                      ? "bg-violet-200 px-4 py-2 rounded-lg border-b-4 solid border-violet-500"
+                      : "bg-violet-200 px-4 py-2 rounded-lg"
+                  }
+                >
+                  Dashboard
+                </NavLink>
+              </li>
+            </>
+          )}
         </ul>
       </div>
       <div className="navbar-end">
-        <a className="bg-violet-400 px-4 py-2 rounded-lg font-semibold">
-          Button
-        </a>
+        <ul className="flex gap-2 items-center font-semibold">
+          {!user ? (
+            <>
+              {" "}
+              <li>
+                <NavLink
+                  to="/login"
+                  className={({ isActive }) =>
+                    isActive
+                      ? "bg-violet-200 px-4 py-2 rounded-lg border-b-4 solid border-violet-500"
+                      : "bg-violet-200 px-4 py-2 rounded-lg"
+                  }
+                >
+                  Login
+                </NavLink>
+              </li>
+              <li>
+                <NavLink
+                  to="/register"
+                  className={({ isActive }) =>
+                    isActive
+                      ? "bg-violet-200 px-4 py-2 rounded-lg border-b-4 solid border-violet-500"
+                      : "bg-violet-200 px-4 py-2 rounded-lg"
+                  }
+                >
+                  Signup
+                </NavLink>
+              </li>
+            </>
+          ) : (
+            <>
+              <button
+                onClick={logOut}
+                className=" bg-[#faa2a0] hover:bg-[#f99796] text-white rounded-lg px-4 py-2"
+              >
+                Logout
+              </button>
+            </>
+          )}
+        </ul>
       </div>
     </div>
   );
