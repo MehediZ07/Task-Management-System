@@ -56,6 +56,18 @@ export default function Navbar() {
           </li>
           <li>
             <NavLink
+              to="/addtask"
+              className={({ isActive }) =>
+                isActive
+                  ? "bg-violet-200 px-4 py-2 rounded-lg border-b-4 solid border-violet-500"
+                  : "bg-violet-100 px-4 py-2 rounded-lg"
+              }
+            >
+              Add Task
+            </NavLink>
+          </li>
+          <li>
+            <NavLink
               to="/login"
               className={({ isActive }) =>
                 isActive

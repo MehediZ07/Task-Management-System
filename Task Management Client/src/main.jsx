@@ -10,6 +10,7 @@ import Home from "./Pages/Home.jsx";
 import Login from "./Pages/Login.jsx";
 import Register from "./Pages/Registration.jsx";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import AddTask from "./Components/AddTask.jsx";
 
 const queryClient = new QueryClient();
 const router = createBrowserRouter([
@@ -21,6 +22,10 @@ const router = createBrowserRouter([
       {
         path: "/",
         element: <Home />,
+      },
+      {
+        path: "/addtask",
+        element: <AddTask />,
       },
       {
         path: "/login",

@@ -4,6 +4,7 @@ import Hero from "../Components/Hero";
 import { AuthContext } from "../Providers/AuthProvider";
 import axios from "axios";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "react-toastify";
 
 function Home() {
   const queryClient = useQueryClient();
@@ -33,34 +34,34 @@ function Home() {
     }
   }, [fetchedTasks]);
 
-  const [newTask, setNewTask] = useState({
-    name: "",
-    description: "",
-    technology: "",
-    givenBy: "",
-    deadline: "",
-    status: "todo",
-  });
+  // const [newTask, setNewTask] = useState({
+  //   name: "",
+  //   description: "",
+  //   technology: "",
+  //   givenBy: "",
+  //   deadline: "",
+  //   status: "todo",
+  // });
 
-  const addTask = async (e) => {
-    e.preventDefault();
-    if (Object.values(newTask).some((val) => val.trim() === "")) return;
+  // const addTask = async (e) => {
+  //   e.preventDefault();
+  //   if (Object.values(newTask).some((val) => val.trim() === "")) return;
 
-    try {
-      await axios.post("http://localhost:5000/task", newTask);
-      queryClient.invalidateQueries("task");
-      setNewTask({
-        name: "",
-        description: "",
-        technology: "",
-        givenBy: "",
-        deadline: "",
-        status: "todo",
-      });
-    } catch (error) {
-      console.error("Error adding task:", error);
-    }
-  };
+  //   try {
+  //     await axios.post("http://localhost:5000/task", newTask);
+  //     queryClient.invalidateQueries("task");
+  //     setNewTask({
+  //       name: "",
+  //       description: "",
+  //       technology: "",
+  //       givenBy: "",
+  //       deadline: "",
+  //       status: "todo",
+  //     });
+  //   } catch (error) {
+  //     console.error("Error adding task:", error);
+  //   }
+  // };
 
   const onDragEnd = async (result) => {
     if (!result.destination) return;
@@ -105,6 +106,18 @@ function Home() {
     }
   };
 
+  const handleDelete = async (_id) => {
+    try {
+      // Ensure the full URL is used for the delete request
+      await axios.delete(`http://localhost:5000/task/${_id}`);
+      refetch(); // Refresh the tasks list
+      toast.success("Delete Successfully.");
+    } catch (err) {
+      console.log(err);
+      toast.error(err.response?.data || "Error deleting task");
+    }
+  };
+
   if (isLoading) return <h2>Loading...</h2>;
 
   return (
@@ -112,7 +125,7 @@ function Home() {
       <Hero />
       {user && (
         <>
-          <div className="max-w-lg mx-auto mt-6 bg-violet-300 p-6 rounded-lg shadow-md mb-8">
+          {/* <div className="max-w-lg mx-auto mt-6 bg-violet-300 p-6 rounded-lg shadow-md mb-8">
             <h2 className="text-xl font-bold mb-4 text-center text-white">
               Add a New Task
             </h2>
@@ -140,7 +153,7 @@ function Home() {
                 Add Task
               </button>
             </form>
-          </div>
+          </div> */}
           <DragDropContext onDragEnd={onDragEnd}>
             <div className="flex space-x-4 p-10 mx-auto w-full min-h-screen">
               {Object.entries(tasks).map(([columnId, columnTasks]) => (
@@ -182,6 +195,15 @@ function Home() {
                               <p className="text-xs text-red-400">
                                 Deadline: {task.deadline}
                               </p>
+                              <div className="flex gap-2">
+                                <button className="btn">Edit</button>
+                                <button
+                                  onClick={() => handleDelete(task._id)}
+                                  className="btn"
+                                >
+                                  Delete
+                                </button>
+                              </div>
                             </div>
                           )}
                         </Draggable>
