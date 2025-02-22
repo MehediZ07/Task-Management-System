@@ -6,6 +6,7 @@ import { toast, ToastContainer } from "react-toastify";
 import { FaRegEye, FaRegEyeSlash } from "react-icons/fa6";
 import { AuthContext } from "../Providers/AuthProvider";
 import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
 // import { AuthContext } from "../../Providers/AuthProvider";
 // import { Helmet } from "react-helmet";
 // import { AuthContext } from "../../Providers/AuthProvider";
@@ -44,15 +45,45 @@ const Login = () => {
       });
   };
 
-  const handleSubmitGoogle = () => {
-    handleGoogleLogin(googleProvider)
-      .then((result) => {
-        setUser(result.user);
-        navigate("/dashboard");
-      })
-      .catch((err) => {
-        setError(...error, err.message);
-      });
+  // const handleSubmitGoogle = () => {
+  //   handleGoogleLogin(googleProvider)
+  //     .then((result) => {
+  //       setUser(result.user);
+  //       navigate("/dashboard");
+  //     })
+  //     .catch((err) => {
+  //       setError(...error, err.message);
+  //     });
+  // };
+
+  const handleSubmitGoogle = async () => {
+    try {
+      const result = await handleGoogleLogin(googleProvider);
+      setUser(result.user);
+
+      // Prepare user data
+      const userData = {
+        name: result.user.displayName,
+        email: result.user.email,
+        photoURL: result.user.photoURL,
+      };
+
+      // Send user data to backend
+      const response = await axios.post(
+        "https://task-management-server-brown-three.vercel.app/users",
+        userData
+      );
+
+      if (response.data.message === "User already exists") {
+        console.log("User already exists in database.");
+      } else {
+        console.log("New user added:", response.data);
+      }
+
+      navigate("/dashboard");
+    } catch (err) {
+      setError([...error, err.message]);
+    }
   };
 
   const togglePasswordVisibility = () => {
@@ -115,14 +146,14 @@ const Login = () => {
             </label>
           </div>
           <div className="form-control mt-6">
-            <button className="btn bg-[#bbe6dd] hover:bg-[#b5eade] text-gray-500 rounded-none">
+            <button className="btn bg-violet-400 hover:bg-violet-500 text-black rounded-none">
               Login
             </button>
           </div>
         </form>
         <div className="form-control max-w-lg px-8 -mt-6">
           <button
-            className="btn bg-[#bbe6dd] hover:bg-[#b5eade] text-gray-500 rounded-none mb-4"
+            className="btn bg-violet-400 hover:bg-violet-500 text-black rounded-none mb-4"
             onClick={() => {
               handleSubmitGoogle();
             }}

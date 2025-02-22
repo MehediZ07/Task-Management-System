@@ -2,7 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config();
-// const { Server } = require("socket.io");
+const { Server } = require("socket.io");
 const http = require("http");
 
 const port = process.env.PORT || 5000;
@@ -24,15 +24,15 @@ const client = new MongoClient(uri, {
     }
 });
 
-// WebSocket Server
-// const io = new Server(server, {
-//     cors: { origin: "*" }
-// });
+WebSocket Server
+const io = new Server(server, {
+    cors: { origin: "*" }
+});
 
-// io.on("connection", (socket) => {
-//     console.log("Client connected");
-//     socket.on("disconnect", () => console.log("Client disconnected"));
-// });
+io.on("connection", (socket) => {
+    console.log("Client connected");
+    socket.on("disconnect", () => console.log("Client disconnected"));
+});
 
 async function run() {
     try {
@@ -41,6 +41,28 @@ async function run() {
 
         const database = client.db('taskManagement');
         const taskCollection = database.collection('task');
+
+        const userCollection = database.collection('users');
+        app.post('/users', async (req, res) => {
+  const newUser = req.body;
+  const existingUser = await userCollection.findOne({ email: newUser.email }); 
+  if (existingUser) {
+      return res.send({ message: "User already exists", user: existingUser });
+  }
+  const result = await userCollection.insertOne(newUser);
+  res.send(result);
+});
+
+ app.get('/user', async (req, res) => {
+            try {
+                const result = await userCollection.find().toArray();
+                res.send(result);
+            } catch (error) {
+                res.status(500).json({ error: "Failed to fetch tasks" });
+            }
+        });
+
+
 
         // Fetch all tasks
         // app.get('/task', async (req, res) => {

@@ -6,30 +6,34 @@ import "react-toastify/dist/ReactToastify.css";
 import { FaRegEye, FaRegEyeSlash } from "react-icons/fa6";
 // import { Helmet } from "react-helmet";
 import { AuthContext } from "../Providers/AuthProvider";
+import axios from "axios";
 
 const Register = () => {
   const { createNewUser, setUser, updateUserProfile } = useContext(AuthContext);
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const navigate = useNavigate();
   const [error, setError] = useState({});
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const form = new FormData(e.target);
     const name = form.get("name");
+
     if (name.length < 5) {
-      toast.error("Follow the requerment!", {
+      toast.error("Follow the requirement!", {
         position: "top-center",
         autoClose: 2000,
       });
-      setError({ ...error, name: "name should be more then 5 character" });
+      setError({ ...error, name: "Name should be more than 5 characters" });
       return;
     }
+
     const email = form.get("email");
     const photo = form.get("photo");
     const password = form.get("password");
+
     const passwordValidation = /^(?=.*[a-z])(?=.*[A-Z])(?=.{6,})/;
     if (!passwordValidation.test(password)) {
-      toast.error("Follow the requerment!", {
+      toast.error("Follow the requirement!", {
         position: "top-center",
         autoClose: 2000,
       });
@@ -40,30 +44,35 @@ const Register = () => {
       });
       return;
     }
-    createNewUser(email, password)
-      .then((result) => {
-        const user = result.user;
-        setUser(user);
-        updateUserProfile({ displayName: name, photoURL: photo })
-          .then(() => {
-            toast.success(`Registration Successful!`, {
-              position: "top-center",
-              autoClose: 2000,
-            });
-            navigate("/dashboard");
-          })
-          .catch((err) => {
-            toast.error("Enter valid email and password!", {
-              position: "top-center",
-              autoClose: 2000,
-            });
-            setError({ ...error, err });
-          });
-      })
-      .catch((err) => {
-        setError({ ...error, err });
+
+    try {
+      const result = await createNewUser(email, password);
+      const user = result.user;
+      setUser(user);
+
+      await updateUserProfile({ displayName: name, photoURL: photo });
+
+      // Send user data to MongoDB
+      await axios.post(
+        "https://task-management-server-brown-three.vercel.app/users",
+        { name, email, photo }
+      );
+
+      toast.success(`Registration Successful!`, {
+        position: "top-center",
+        autoClose: 2000,
       });
+
+      navigate("/dashboard");
+    } catch (err) {
+      toast.error("Enter valid email and password!", {
+        position: "top-center",
+        autoClose: 2000,
+      });
+      setError({ ...error, err });
+    }
   };
+
   const togglePasswordVisibility = () => {
     setIsPasswordVisible((prevState) => !prevState);
   };
